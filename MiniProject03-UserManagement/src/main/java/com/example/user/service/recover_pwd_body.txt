@@ -1,0 +1,8 @@
+Hi {FULL_NAME} ,<br>
+<br>
+please find your temporary password below <br>
+<b> Password ::{PWD}.</b><br>
+<a href="{URL}">Click here to unlock your Account</a><br>
+<br>
+<i>Thanks ,</i><br>
+	<i>Admin </i>

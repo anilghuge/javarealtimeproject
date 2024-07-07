@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: MiniProject02-ReportGeneration
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///report_generation
+    username: root
+    password: root123
+  jpa:
+   show-sql: true
+   hibernate:
+      ddl-auto: update
+   database-platform: org.hibernate.dialect.MySQL8Dialect
+  sql:
+    init:
+      mode: always
+   
+server:
+  port: 8082 
