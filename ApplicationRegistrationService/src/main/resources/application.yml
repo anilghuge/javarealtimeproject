@@ -1,0 +1,15 @@
+server:
+  port: 7071
+spring:
+  application:
+    name: ApplicationRegistrationService
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: root123
+    url: jdbc:mysql:///ish-db
+    username: root
+  jpa:
+    database-platform: org.hibernate.dialect.MYSQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
