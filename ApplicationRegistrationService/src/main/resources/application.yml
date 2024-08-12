@@ -4,12 +4,16 @@ spring:
   application:
     name: ApplicationRegistrationService
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
     password: root123
-    url: jdbc:mysql:///ish-db
-    username: root
+    url: jdbc:postgresql://localhost:5432/ish-db
+    username: postgres
   jpa:
-    database-platform: org.hibernate.dialect.MYSQL8Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true
+ar:
+  ssa-web:
+   url: http://localhost:9090/ssa-web-api/find/{ssn}
+  state: california
