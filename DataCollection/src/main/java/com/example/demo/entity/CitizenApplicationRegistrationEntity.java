@@ -2,6 +2,9 @@ package com.example.demo.entity;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,8 +22,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class CitizenApplicationRegistrationEntity extends AuditBase {
+public class CitizenApplicationRegistrationEntity {
 
 	@Id
 	@SequenceGenerator(name="gen1_seq",sequenceName = "app_id_seq",initialValue = 1000,allocationSize = 1)
@@ -37,5 +39,15 @@ public class CitizenApplicationRegistrationEntity extends AuditBase {
 	@Column(length = 30)
 	private String stateName;
 	private LocalDate dob;
+	@Column(length = 30)
+	private String createdBy;
+	@Column(length = 30)
+	private String updatedBy;
+	@CreationTimestamp
+	@Column(updatable = false)
+	private LocalDate creationDate;
+	@UpdateTimestamp
+	@Column(insertable = false)
+	private LocalDate updationDate;
 	
 }
