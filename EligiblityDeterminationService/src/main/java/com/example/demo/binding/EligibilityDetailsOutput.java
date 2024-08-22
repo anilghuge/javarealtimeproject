@@ -5,10 +5,9 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
-public class EligiblityDetailsOutput {
+public class EligibilityDetailsOutput {
 
 	private String holderName;
-	private Long holderSSN;
 	private String planName;
 	private String planStatus;
 	private LocalDate planStartDate;

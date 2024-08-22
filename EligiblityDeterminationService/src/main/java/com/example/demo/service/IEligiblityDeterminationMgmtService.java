@@ -1,8 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.binding.EligiblityDetailsOutput;
+import com.example.demo.binding.EligibilityDetailsOutput;
 
 public interface IEligiblityDeterminationMgmtService {
 
-	public EligiblityDetailsOutput determineEligiblity(Integer caseNo);
+	public EligibilityDetailsOutput determineEligiblity(Integer caseNo);
 }
