@@ -5,17 +5,26 @@ import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.binding.EligibilityDetailsOutput;
+import com.example.demo.entity.COTriggersEntity;
+import com.example.demo.entity.CitizenApplicationRegistrationEntity;
 import com.example.demo.entity.DCCaseEntity;
 import com.example.demo.entity.DCChildernEntity;
+import com.example.demo.entity.DCEductionEntity;
 import com.example.demo.entity.DCIncomeEntity;
+import com.example.demo.entity.ElibilityDetailsEntity;
 import com.example.demo.entity.PlanEntity;
+import com.example.demo.repository.IApplicationRegistrationRepository;
+import com.example.demo.repository.ICOTriggerRepository;
 import com.example.demo.repository.IDCCaseRepository;
 import com.example.demo.repository.IDCChildernRepository;
+import com.example.demo.repository.IDCEductionRepository;
 import com.example.demo.repository.IDCIncomeRepository;
+import com.example.demo.repository.IEligibilityDeterminationRepository;
 import com.example.demo.repository.IPlanRepository;
 import com.example.demo.service.IEligiblityDeterminationMgmtService;
 
@@ -33,6 +42,18 @@ public class EligiblityDeterminationMgmtServiceImpl implements IEligiblityDeterm
 
 	@Autowired
 	private IDCChildernRepository childernRepository;
+
+	@Autowired
+	private IApplicationRegistrationRepository citizenRepo;
+
+	@Autowired
+	private IDCEductionRepository eductionRepository;
+
+	@Autowired
+	private IEligibilityDeterminationRepository eligiblityDetermineRepository;
+
+	@Autowired
+	private ICOTriggerRepository triggerRepository;
 
 	@Override
 	public EligibilityDetailsOutput determineEligiblity(Integer caseNo) {
@@ -54,20 +75,43 @@ public class EligiblityDeterminationMgmtServiceImpl implements IEligiblityDeterm
 			planName = planEntity.getPlanName();
 		}
 
-		// call helper method to plan conditions
-		EligibilityDetailsOutput eligiblityDetailsOutput = applyPlanCondition(caseNo, planName);
+		// calculate citizen age by getting citizen DOB through appId
 
+		Optional<CitizenApplicationRegistrationEntity> optCitizenEntity = citizenRepo.findById(appId);
+		int citizenAge = 0;
+		String citizenName = null;
+		if (optCitizenEntity.isPresent()) {
+			CitizenApplicationRegistrationEntity citizenApplicationRegistrationEntity = optCitizenEntity.get();
+			LocalDate citizenDob = citizenApplicationRegistrationEntity.getDob();
+			LocalDate sysDate = LocalDate.now();
+			citizenAge = Period.between(citizenDob, sysDate).getYears();
+			citizenName = citizenApplicationRegistrationEntity.getFullName();
+		}
+
+		// call helper method to plan conditions
+		EligibilityDetailsOutput eligiblityDetailsOutput = applyPlanCondition(caseNo, planName, citizenAge);
+
+		eligiblityDetailsOutput.setHolderName(citizenName);
+
+		ElibilityDetailsEntity elibilityDetailsEntity = new ElibilityDetailsEntity();
+		BeanUtils.copyProperties(eligiblityDetailsOutput, elibilityDetailsEntity);
 		// save Eligibility entity object
+		eligiblityDetermineRepository.save(elibilityDetailsEntity);
+
 		// save CoTriggers Object
+		COTriggersEntity triggersEntity = new COTriggersEntity();
+		triggersEntity.setCaseNo(caseNo);
+		triggersEntity.setTriggerStatus("Pending");
+		triggerRepository.save(triggersEntity);
+
 		return eligiblityDetailsOutput;
 	}
 
-	private EligibilityDetailsOutput applyPlanCondition(Integer caseNo, String planName) {
+	private EligibilityDetailsOutput applyPlanCondition(Integer caseNo, String planName, int citizenAge) {
 		EligibilityDetailsOutput eligiblityDetailsOutput = new EligibilityDetailsOutput();
 		eligiblityDetailsOutput.setPlanName(planName);
 
 		// get income details of the citizen
-
 		DCIncomeEntity incomeEntity = incomeRepository.findByCaseNo(caseNo);
 		Double employeeIncome = incomeEntity.getEmployeeIncome();
 		Double propertyIncome = incomeEntity.getPropertyIncome();
@@ -94,32 +138,52 @@ public class EligiblityDeterminationMgmtServiceImpl implements IEligiblityDeterm
 					if (kidAge > 16) {
 						kidsAgeCondition = false;
 						break;
-					}//if
-				}//for
-			}//if
+					} // if
+				} // for
+			} // if
 
-			if(employeeIncome<=300 && kidsCountCondition && kidsAgeCondition) {
+			if (employeeIncome <= 300 && kidsCountCondition && kidsAgeCondition) {
 				eligiblityDetailsOutput.setPlanStatus("Approved");
 				eligiblityDetailsOutput.setBenifitAmt(300.0);
-			}else {
+			} else {
 				eligiblityDetailsOutput.setPlanStatus("Denied");
 				eligiblityDetailsOutput.setDenialReason("CCAP rules are not satisfied");
 			}
-			
+
 		} else if (planName.equalsIgnoreCase("MEDAID")) {
-			if(employeeIncome<=300 && propertyIncome==0) {
+			if (employeeIncome <= 300 && propertyIncome == 0) {
 				eligiblityDetailsOutput.setPlanStatus("Approved");
 				eligiblityDetailsOutput.setBenifitAmt(300.0);
-			}else {
+			} else {
 				eligiblityDetailsOutput.setPlanStatus("Denied");
 				eligiblityDetailsOutput.setDenialReason("MEDAID rules are not satisfied");
 			}
 		} else if (planName.equalsIgnoreCase("MEDCARE")) {
-			
+			if (citizenAge >= 65) {
+				eligiblityDetailsOutput.setPlanStatus("Approved");
+				eligiblityDetailsOutput.setBenifitAmt(350.0);
+			} else {
+				eligiblityDetailsOutput.setPlanStatus("Denied");
+				eligiblityDetailsOutput.setDenialReason("MEDCARE rules are not satisfied");
+			}
 		} else if (planName.equalsIgnoreCase("CAJW")) {
+			DCEductionEntity eductionEntity = eductionRepository.findByCaseNo(caseNo);
+			int passOutYear = eductionEntity.getPassOutYear();
 
-		} else {
-
+			if (employeeIncome == 0 && passOutYear < LocalDate.now().getYear()) {
+				eligiblityDetailsOutput.setPlanStatus("Approved");
+				eligiblityDetailsOutput.setBenifitAmt(300.0);
+			} else {
+				eligiblityDetailsOutput.setPlanStatus("Denied");
+				eligiblityDetailsOutput.setDenialReason("CAJW rules are not satisfied");
+			}
+		} else if (planName.equalsIgnoreCase("QHP")) {
+			if (citizenAge >= 1) {
+				eligiblityDetailsOutput.setPlanStatus("Approved");
+			} else {
+				eligiblityDetailsOutput.setPlanStatus("Denied");
+				eligiblityDetailsOutput.setDenialReason("QHP rules are not satisfied");
+			}
 		}
 
 		// set the common properties for eligibility object
