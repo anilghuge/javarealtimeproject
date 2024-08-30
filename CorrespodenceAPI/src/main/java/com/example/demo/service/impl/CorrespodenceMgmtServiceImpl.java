@@ -45,6 +45,9 @@ public class CorrespodenceMgmtServiceImpl implements ICorrespodenceMgmtService {
 
 	@Autowired
 	private IApplicationRegistrationRepository citizenRepo;
+	
+	@Autowired
+	private EmailUtils emailUtils;
 
 	@Override
 	public CoSummary processPendingTriggers() {
@@ -121,7 +124,7 @@ public class CorrespodenceMgmtServiceImpl implements ICorrespodenceMgmtService {
 			addTableHeader(table);
 
 			// Add rows
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 				table.addCell(String.valueOf(eligiblityEntity.getEdTracId()));
 				table.addCell(String.valueOf(eligiblityEntity.getCaseNo()));
@@ -139,8 +142,8 @@ public class CorrespodenceMgmtServiceImpl implements ICorrespodenceMgmtService {
 			
 			// send the generated pdf doc as teh email message
 			String subject="Plan Approval/Denial mail";
-			String body="Hello Mr/Miss/Mrs."+citizenEntity.getFullName()+",This mail contains complee\te details plan approval or denial";
-			EmailUtils.sendMail(citizenEntity.getEmail(),subject,body,file);
+			String body="Hello Mr/Miss/Mrs."+citizenEntity.getFullName()+",This mail contains complete details plan approval or denial";
+			emailUtils.sendMail(citizenEntity.getEmail(),subject,body,file);
 			
 			//Update CO_trigger table
 			// store pdf doc in CO_triggers db table and update Trigger status to completed

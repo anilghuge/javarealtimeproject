@@ -15,9 +15,9 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailUtils {
 
 	@Autowired
-	private static JavaMailSender sender;
+	private  JavaMailSender sender;
 
-	public static void sendMail(String email, String subject, String body, File file) throws MessagingException {
+	public  void sendMail(String email, String subject, String body, File file) throws MessagingException {
 		MimeMessage messag = sender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(messag, true);
 		helper.setTo(email);

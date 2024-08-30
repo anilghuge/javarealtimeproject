@@ -80,22 +80,25 @@ public class EligiblityDeterminationMgmtServiceImpl implements IEligiblityDeterm
 		Optional<CitizenApplicationRegistrationEntity> optCitizenEntity = citizenRepo.findById(appId);
 		int citizenAge = 0;
 		String citizenName = null;
+		Long citizenSSN=0L;
 		if (optCitizenEntity.isPresent()) {
 			CitizenApplicationRegistrationEntity citizenApplicationRegistrationEntity = optCitizenEntity.get();
 			LocalDate citizenDob = citizenApplicationRegistrationEntity.getDob();
 			LocalDate sysDate = LocalDate.now();
 			citizenAge = Period.between(citizenDob, sysDate).getYears();
 			citizenName = citizenApplicationRegistrationEntity.getFullName();
+			citizenSSN=citizenApplicationRegistrationEntity.getSsn();
 		}
 
 		// call helper method to plan conditions
 		EligibilityDetailsOutput eligiblityDetailsOutput = applyPlanCondition(caseNo, planName, citizenAge);
 
 		eligiblityDetailsOutput.setHolderName(citizenName);
-
 		ElibilityDetailsEntity elibilityDetailsEntity = new ElibilityDetailsEntity();
 		BeanUtils.copyProperties(eligiblityDetailsOutput, elibilityDetailsEntity);
 		// save Eligibility entity object
+		elibilityDetailsEntity.setCaseNo(caseNo);
+		elibilityDetailsEntity.setHolderSSN(citizenSSN);
 		eligiblityDetermineRepository.save(elibilityDetailsEntity);
 
 		// save CoTriggers Object
