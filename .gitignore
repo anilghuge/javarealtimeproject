@@ -37,3 +37,7 @@ build/
 /bin
 /.metadata/
 *.MF
+*/.mvn
+*/maven-wrapper.jar
+*/mvnw
+*/mvnw.cmd
