@@ -1,0 +1,20 @@
+server:
+  port : 7075
+spring:
+ batch:
+   job:
+     enabled: false
+   jdbc:
+     initialize-schema: always
+ application:
+    name: BenefitIssunaceAPI
+ datasource:
+    driver-class-name: org.postgresql.Driver
+    password: root123
+    url: jdbc:postgresql://localhost:5432/ish-db
+    username: postgres
+ jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
