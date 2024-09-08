@@ -1,15 +1,21 @@
 package com.example.processor;
 
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Component;
 
 import com.example.entity.ElibilityDetailsEntity;
+import com.example.model.ElibilityDetails;
 
-public class EDDetailsProcessor implements ItemProcessor<ElibilityDetailsEntity, ElibilityDetailsEntity> {
+@Component
+public class EDDetailsProcessor implements ItemProcessor<ElibilityDetailsEntity, ElibilityDetails> {
 
 	@Override
-	public ElibilityDetailsEntity process(ElibilityDetailsEntity item) throws Exception {
+	public ElibilityDetails process(ElibilityDetailsEntity item) throws Exception {
 		if (item.getPlanStatus().equalsIgnoreCase("Approved")) {
-			return item;
+			ElibilityDetails details=new ElibilityDetails();
+			BeanUtils.copyProperties(item, details);
+			return details;
 		} else {
 			return null;
 		}

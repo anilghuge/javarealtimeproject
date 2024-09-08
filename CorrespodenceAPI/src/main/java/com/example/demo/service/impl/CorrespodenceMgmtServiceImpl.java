@@ -6,6 +6,10 @@ import java.io.FileOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,45 +53,67 @@ public class CorrespodenceMgmtServiceImpl implements ICorrespodenceMgmtService {
 	@Autowired
 	private EmailUtils emailUtils;
 
+	int pendingTriggers=0;
+	int successTriggers=0;
+	
 	@Override
 	public CoSummary processPendingTriggers() {
 		CitizenApplicationRegistrationEntity citizenEntity = null;
 		// get all pending triggers
 		List<COTriggersEntity> triggerslist = coTriggerDAO.findByTriggerStatus("Pending");
-		int pendingTriggers=0;
-		int successTriggers=0;
+		
+		CoSummary summary=new CoSummary();
+		summary.setTotalTriggers(triggerslist.size());
+		
+		ExecutorService executorService=Executors.newFixedThreadPool(10);
+		ExecutorCompletionService<Object> pool=new ExecutorCompletionService<Object>(executorService);
+		
+		
 		// process each pending trigger
 		for (COTriggersEntity triggerEntity : triggerslist) {
-			// get eligibility details based on case number
-			ElibilityDetailsEntity elibilityDetailsEntity = eligiblityDeterminationdDAO
-					.findByCaseNo(triggerEntity.getCaseNo());
-			// get citizen data based on case number
-			Optional<DCCaseEntity> optCaseEntity = caseRepository.findById(triggerEntity.getCaseNo());
-			if (optCaseEntity.isPresent()) {
-				DCCaseEntity caseEntity = optCaseEntity.get();
-				Integer appId = caseEntity.getAppId();
-				Optional<CitizenApplicationRegistrationEntity> optCitizenEntity = citizenRepo.findById(appId);
-				if (optCitizenEntity.isPresent()) {
-					citizenEntity = optCitizenEntity.get();
+			pool.submit(new Callable<Object>() {
+				
+				@Override
+				public Object call() throws Exception {
+					try {
+						processTrigger(citizenEntity, triggerEntity);
+						successTriggers++;
+					} catch (Exception e) {
+						pendingTriggers++;
+						e.printStackTrace();
+					}
+					return null;
 				}
-			}
-			// generate pdf doc having eligibility details and send that pdf soc as email 
-			try {
-				generatePdfAndSendMail(elibilityDetailsEntity, citizenEntity);
-				successTriggers++;
-			} catch (Exception e) {
-				pendingTriggers++;
-				e.printStackTrace();
-			}
+			});
+			
 		
 		}
 
-		CoSummary summary=new CoSummary();
-		summary.setTotalTriggers(triggerslist.size());
+	
 		summary.setPendingTriggers(pendingTriggers);
 		summary.setSuccessTrigger(successTriggers);
 
 		return summary;
+	}
+
+	private CitizenApplicationRegistrationEntity processTrigger(CitizenApplicationRegistrationEntity citizenEntity,
+			COTriggersEntity triggerEntity) throws Exception {
+		// get eligibility details based on case number
+		ElibilityDetailsEntity elibilityDetailsEntity = eligiblityDeterminationdDAO
+				.findByCaseNo(triggerEntity.getCaseNo());
+		// get citizen data based on case number
+		Optional<DCCaseEntity> optCaseEntity = caseRepository.findById(triggerEntity.getCaseNo());
+		if (optCaseEntity.isPresent()) {
+			DCCaseEntity caseEntity = optCaseEntity.get();
+			Integer appId = caseEntity.getAppId();
+			Optional<CitizenApplicationRegistrationEntity> optCitizenEntity = citizenRepo.findById(appId);
+			if (optCitizenEntity.isPresent()) {
+				citizenEntity = optCitizenEntity.get();
+			}
+		}
+		// generate pdf doc having eligibility details and send that pdf soc as email 
+			generatePdfAndSendMail(elibilityDetailsEntity, citizenEntity);
+		return citizenEntity;
 	}
 
 	private void generatePdfAndSendMail(ElibilityDetailsEntity eligiblityEntity,
