@@ -8,16 +8,8 @@ spring:
      initialize-schema: always
  application:
     name: BenefitIssunaceAPI
- datasource:
-    driver-class-name: org.postgresql.Driver
-    password: root123
-    url: jdbc:postgresql://localhost:5432/ish-db
-    username: postgres
- jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+ config:
+    import: optional:configserver:http://localhost:8888
 
 eureka:
   client:

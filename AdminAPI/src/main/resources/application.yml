@@ -1,20 +1,28 @@
 server:
   port: 7074
+
 spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:9998
   application:
     name: AdminAPI
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    password: root123
-    url: jdbc:postgresql://localhost:5432/ish-db
-    username: postgres
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+  config:
+    import: optional:configserver:http://localhost:8888
 
 eureka:
   client:
     service-url:
       default-zone: http://localhost:8761/eureka
+
+management:
+  endpoint:
+    env:
+      enabled: true
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
