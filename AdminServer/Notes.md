@@ -106,6 +106,22 @@ management:
 
 - Note : Admin server of Spring Boot provides GUI env .. to get the actuators info about the all the Rest/Micerservices
 
+--------------------------------------
+
+### Adding Spring cloud API Gateway for the Rest projects
+- API Gateway acts as the entry and exit point for all the microservices
+- Using API Gatway,we can access all the microservices of the project using common url
+
+- step 1) create spring boot project as the api gateway project
+-step 4) run the project in following order
+    - 1 eureka server
+    - 2 Admin server
+    - 3 Config Server
+    - 4 Cloud API gateway
+    - 5 all the microservices
+- step 5) Test the MS projects using Cloud API gateway port number /url
+    - 1 http://localhost:7777/plan-api/all
+    - 2 -- etc.
 
 
 
