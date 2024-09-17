@@ -124,6 +124,92 @@ management:
     - 2 -- etc.
 
 
+-------------------------
+### Recap on Exception Handling
+- we can use try,catch and finally blocks for exception handling
+- finally block executes inreespective of execption that is raised in try block
+- try with single or multiple catch blocks or try with finally block is allowed
+```
+try{
+    --
+    --
+}catch(--){
+    // to handle known exception
+}catch(--){
+    // to handle known exception
+}catch(Exception e){
+    // to handle unknown exception
+}finallly{
+    //Logic to close the resources(like streams)
+}
+```
+- Note - followed try block,first we must kept knoen exception catch blocks,later we need to place unknoen exception catch block having exception or throwable class
+
+### can we handle mutiple exception using single catch block?
+- Yes,possible
+```
+try{
+    ---
+    ----
+    --
+}catch(NullPointerException | IllegalArugmentexception ex){
+    ---
+    ---
+}
+```
+
+### Why should we catch and handle the exception
+- To Stop the abnormal termination of the application when the exception is raised(To continue application execution flow)
+- To display non-techinal guiding message to enduser instead of techical message when the exception is raised
+
+### What is difference between checked exception and unchecked exception
+- the immediate sub class of java.lang.Exception is called checked exception 
+- the sub classes(direct or indirect) of java.lang.RuntimeException is called unchecked exception class
+- if the java code is dealing with checked exception then java compiler will alert u to catch and handle the exception at compile time by raising the error
+- if the java code is dealing with checked exception then java compiler will alert u to catch and handle the exception at compile time
+- Both checked and unchecked exception will be raised at run time
+
+- try,catch,finally  -> for catching and handling the exceptions
+- throw --> ceating the exception
+- throws ---> to declaring the exception to be thrown
+
+-------
+From Java 7 onwards we got trywith resource feature i.e resuource that are opned in try statement will be closed automatically at the ned of try so we need not to close them separtely by finally block
+```
+try(open resuorce like stream or jdbc con or ---){
+    ---
+    ----
+    ---//use the resource
+}catch(--){}
+catch(--){}
+catch(Exception e){}
+```
+
+----------------
+### Exception handling in our spring boot rest/spring rest project can be handling in two ways
+- 1 Rest Controller specific exception handling(Specific to one RestController class)(Not Recommanded)  
+- 2.gloval exception handling (common for the all exception raised in the all class of project)(Best and Recommanded)
+
+### In Real Projects, for every custom or ready exception the Project will give our one project error code,so while exception related log file,we need to write this code 
+
+- 1 Rest Controller specific exception handling(Specific to one RestController class)(Not Recommanded)  
+    - 1) for this we need to keep @ExceptionHandler(-) method inside the @RestControllerclass i.e it will response and handling only the exception raised in that @RestController class i.e exception raised on other classes will not be handled
+- 2 gloval exception handling (common for the all exception raised in the all class of project)(Best and Recommanded)
+    - for this take @RestControllerAdvice separtely having @ExceptionHandler(--) method 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
