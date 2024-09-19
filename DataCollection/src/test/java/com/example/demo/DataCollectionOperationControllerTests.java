@@ -24,6 +24,7 @@ import com.example.demo.binding.PlanSelectionInputs;
 import com.example.demo.controllers.DataCollectionOperationController;
 import com.example.demo.service.IDcMgmtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @WebMvcTest(value = DataCollectionOperationController.class)
@@ -173,7 +174,8 @@ public class DataCollectionOperationControllerTests {
 	    Mockito.when(dcMgmtService.saveChildernDetails(inputList)).thenReturn(1001);
 
 	    ObjectMapper mapper = new ObjectMapper();
-	    mapper.registerModule(new JavaTimeModule());  // Register the JSR310 module here
+	    mapper.registerModule(new JavaTimeModule());
+	    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 	    String valueAsString = mapper.writeValueAsString(inputList);
 
 	    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/dc-api/saveChilds")
