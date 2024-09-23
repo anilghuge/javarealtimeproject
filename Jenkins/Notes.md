@@ -64,7 +64,25 @@ Development + Operations = devlopment Operations(DevOps)
 - Project
 
 
+## Automating the build process of java Web Application Using Jenkins
+- Build and Deployemnt process
+  - Develop the app,test with Locak Tomcat Server -> Development
+  - Commit the code to Git Repository --> Build Action
+  - Download the project from GIT repository by git clone command -> Build Action
+  - package the Project war file  using maven "clean package" -> deployment
+  - Deploy the war file Ec2-instance Tomcat server -> deployment
+  - access the application from browser -> manul testing
+  
+- Note - The build deployment activaties can automated using Jenkins tool
 
+### Infrasture setup
+- a) create Linux VM as AWS Ec2 instance to install Tomcat server
+- b) create Linux VM as AWS Ec2 instance to install Jenkins server
+- c) Clone the Git Repository to get access to the project that we want to diplay
+
+
+### Whole process
+- step 1) keep the java web application ready by creating it as maven web application
 
 
 
